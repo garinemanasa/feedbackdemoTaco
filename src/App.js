@@ -92,28 +92,15 @@ function App() {
     }
 
     // Find matching menu items
-    FOOD_TRUCK_MENU.forEach(item => {
-  // Try to match full item name first (ignoring case)
-  if (lowerText.includes(item.name.toLowerCase())) {
-    foundItems.push({ ...item, quantity });
-    return;
-  }
-  // Otherwise, match only if ALL keywords are present for multi-word items
-  if (
-    item.keywords.length > 1 &&
-    item.keywords.every(keyword => lowerText.includes(keyword.toLowerCase()))
-  ) {
-    foundItems.push({ ...item, quantity });
-    return;
-  }
-  // For single-keyword items, match if keyword is present
-  if (
-    item.keywords.length === 1 &&
-    lowerText.includes(item.keywords[0].toLowerCase())
-  ) {
-    foundItems.push({ ...item, quantity });
-  }
-});
+   FOOD_TRUCK_MENU.forEach(item => {
+      const itemFound = item.keywords.some(keyword => 
+        lowerText.includes(keyword.toLowerCase())
+      );
+      
+      if (itemFound) {
+        foundItems.push({ ...item, quantity, cartId: Date.now() + Math.random() });
+      }
+    });
 
 
     if (foundItems.length > 0) {
