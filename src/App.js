@@ -26,7 +26,7 @@ const FOOD_TRUCK_MENU = [
     price: 14.99,
     category: 'seafood',
     description: 'Beer battered cod, crispy fries, tartar sauce',
-    keywords: ['fish', 'fish and chips', 'cod', 'fries']
+    keywords: ['fish', 'chips', 'cod', 'fries']
   },
   {
     id: 4,
@@ -50,7 +50,7 @@ const FOOD_TRUCK_MENU = [
     price: 11.99,
     category: 'appetizers',
     description: 'Tortilla chips, cheese, jalapeños, sour cream',
-    keywords: ['nachos', 'loaded', 'chips', 'cheese']
+    keywords: ['nachos', 'loaded', 'cheese']
   }
 ];
 
