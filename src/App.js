@@ -26,7 +26,7 @@ const FOOD_TRUCK_MENU = [
     price: 14.99,
     category: 'seafood',
     description: 'Beer battered cod, crispy fries, tartar sauce',
-    keywords: ['fish', 'chips', 'cod', 'fries']
+    keywords: ['fish', 'fish and chips', 'cod', 'fries']
   },
   {
     id: 4,
