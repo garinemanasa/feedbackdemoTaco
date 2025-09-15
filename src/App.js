@@ -2,6 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import './App.css';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client
+const supabaseUrl = 'https://ahcvajjckfkucbulioxc.supabase.com';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFoY3Zhampja2ZrdWNidWxpb3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2MDgyNDIsImV4cCI6MjA3MzE4NDI0Mn0.mOkbBVwBAkHsZPMikrttnV0pu4DRaSlfLwiQUPwC2Vg';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const FOOD_TRUCK_MENU = [
   {
@@ -53,6 +59,71 @@ const FOOD_TRUCK_MENU = [
     keywords: ['nachos', 'loaded', 'cheese']
   }
 ];
+
+
+
+// Add a new function to create a new order in Supabase
+const createNewOrder = async () => {
+  if (cart.length === 0) {
+    alert('Your cart is empty. Add items before placing an order.');
+    return;
+  }
+
+  const orderItems = cart.map(item => ({
+    menu_item_id: item.id,
+    item_name: item.name,
+    quantity: item.quantity,
+    price_at_time_of_order: item.price
+  }));
+
+  const total = calculateTotal();
+  
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .insert([
+        { 
+          total_amount: total,
+          status: 'pending' // Initial status
+        }
+      ])
+      .select();
+
+    if (error) throw error;
+
+    const newOrder = data[0];
+    const orderId = newOrder.id;
+
+    // Insert order items into the order_items table
+    const itemsToInsert = orderItems.map(item => ({
+      ...item,
+      order_id: orderId
+    }));
+    
+    const { error: itemsError } = await supabase
+      .from('order_items')
+      .insert(itemsToInsert);
+
+    if (itemsError) throw itemsError;
+
+    // Confirmation message with the order ID
+    const confirmationMessage = `Your order has been placed! Your order ID is ${orderId}. Total is $${total.toFixed(2)}. Please proceed to the food truck for payment.`;
+    alert(confirmationMessage);
+    
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(confirmationMessage);
+      window.speechSynthesis.speak(utterance);
+    }
+
+    clearCart();
+
+  } catch (error) {
+    console.error('Error placing order:', error.message);
+    alert('There was an error placing your order. Please try again.');
+  }
+};
+
+
 
 function App() {
   const [cart, setCart] = useState([]);
@@ -170,6 +241,7 @@ function App() {
     }
   };
 
+  // Replace the existing placeOrder function with the new one
   const placeOrder = () => {
     if (cart.length === 0) {
       alert('Please add items to your cart first.');
@@ -177,8 +249,7 @@ function App() {
     }
 
     const total = calculateTotal();
-    const confirmed = window.confirm(`Total: $${total.toFixed(2)}\n\nPlace your order?`);
-    
+    const confirmed = window.confirm(`Total: $${calculateTotal().toFixed(2)}\n\nPlace your order?`);
     if (confirmed) {
       if ('speechSynthesis' in window) {
         const utterance = new SpeechSynthesisUtterance(
@@ -188,6 +259,7 @@ function App() {
       }
       alert('Order placed! Thank you for your order. Please proceed to the truck for payment and pickup.');
       clearCart();
+            createNewOrder();
     }
   };
 
